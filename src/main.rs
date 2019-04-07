@@ -1,4 +1,11 @@
 use rs_ws281x::{ControllerBuilder, ChannelBuilder, StripType};
+use rand::prelude::*;
+use std::thread;
+
+struct LEDSegment {
+	length: u32,
+	offset: u32
+}
 
 fn main() {
 	let mut controller = ControllerBuilder::new()
@@ -8,24 +15,20 @@ fn main() {
 		0,
 		ChannelBuilder::new()
 			.pin(18)
-			.count(10)
+			.count(600)
 			.strip_type(StripType::Ws2812)
 			.brightness(255)
 			.build()
 		)
 		.build().unwrap();
 
-	let leds = controller.leds_mut(0);
-	leds[0] = [255, 0, 0, 0];
-	leds[1] = [0, 255, 0, 0];
-	leds[2] = [0, 0, 255, 0];
-	leds[3] = [255, 255, 0, 0];
-	leds[4] = [255, 0, 255, 0];
-	leds[5] = [0, 255, 255, 0];
-	leds[6] = [255, 255, 255, 0];
-	leds[7] = [255, 0, 0, 0];
-	leds[8] = [0, 255, 0, 0];
-	leds[9] = [0, 0, 255, 0];
+	loop {
+		let leds = controller.leds_mut(0);
+		for i in 0..600 {
+			leds[i] = [rand::random::<u8>(), rand::random::<u8>(), rand::random::<u8>(), 0];
+		}
 
-	controller.render();
+		controller.render();
+		thread::sleep_ms(1000);
+	}
 }

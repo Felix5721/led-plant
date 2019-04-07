@@ -1,8 +1,9 @@
 [package]
 name = "led-plant"
 version = "0.1.0"
-authors = ["Felix5721 <judge@felixrichter.tech>"]
+authors = ["ju6ge <judge@felixrichter.tech>"]
 edition = "2018"
 
 [dependencies]
 rs_ws281x = "0.2.3"
+rand = "0.6"
