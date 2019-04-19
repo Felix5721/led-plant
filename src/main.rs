@@ -1,6 +1,7 @@
 use rs_ws281x::{ControllerBuilder, ChannelBuilder, StripType};
 use rand::prelude::*;
 use std::thread;
+use palette::{Srgb, Lch, Hsv, Hue};
 
 
 #[derive(Debug, Clone)]
@@ -30,7 +31,7 @@ impl LEDSegment {
 		}
 	}
 
-	fn sel_color(&mut self, pos : u32, color: [u8; 4]) {
+	fn set_color(&mut self, pos : u32, color: [u8; 4]) {
 		self.color_data[pos as usize] = [ color, color ];
 	}
 
@@ -71,7 +72,7 @@ fn setup_strip_def() -> Vec<LEDSegment>{
 	return strips;
 }
 
-fn render_strips(mut controller : rs_ws281x::Controller, strips: Vec<LEDSegment> ) -> rs_ws281x::Controller{
+fn render_strips(mut controller : rs_ws281x::Controller, strips: &Vec<LEDSegment> ) -> rs_ws281x::Controller{
 	for strip in strips.iter() {
 		controller = strip.update_controller(controller);
 	}
@@ -89,18 +90,30 @@ fn main() {
 			.pin(18)
 			.count(600)
 			.strip_type(StripType::Ws2812)
-			.brightness(255)
+			.brightness(128)
 			.build()
 		)
 		.build().unwrap();
 
-	let mut plant_stips = setup_strip_def();
-	plant_stips[0].set_all_color([0, 255, 0, 0]);
-	plant_stips[2].set_all_color([255, 255, 0, 0]);
-	plant_stips[3].set_all_color([0, 255, 255, 0]);
-	plant_stips[1].set_all_color([255, 0, 0, 0]);
-	plant_stips[4].set_all_color([0, 0, 255, 0]);
+	let mut plant_strips = setup_strip_def();
+	let mut colors : [ palette::Srgb; 5] = [ palette::Srgb::new(0., 0., 0.); 5];
 
-	controller = render_strips(controller, plant_stips);
-	//thread::sleep_ms(100);
+	colors[0] = palette::Srgb::new(0., 1. ,0.);
+	colors[1] = palette::Srgb::new(0., 0. ,1.);
+	colors[2] = palette::Srgb::new(0., 1. ,1.);
+	colors[3] = palette::Srgb::new(1., 1. ,0.);
+	colors[4] = palette::Srgb::new(1., 0. ,0.);
+
+	loop {
+		for i in 0..5 {
+			plant_strips[i].set_all_color([(255. * colors[i].blue) as u8, (255. * colors[i].green) as u8, (255. * colors[i].red) as u8 ,0]);
+		}
+		controller = render_strips(controller, &plant_strips);
+		thread::sleep_ms(200);
+		for i in 0..5 {
+			let mut lch_color: Hsv = colors[i].into();
+			lch_color = lch_color.shift_hue(1.0);
+			colors[i] = Srgb::from(lch_color);
+		}
+	}
 }

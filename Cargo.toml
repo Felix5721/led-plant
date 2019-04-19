@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 rs_ws281x = "0.2.3"
 rand = "0.6"
+palette = "0.4"
